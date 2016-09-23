@@ -11,6 +11,8 @@
 #define DHTTYPE DHT11 // DHT11
 #define DHTPIN  12 // DHT11 no pino 12 do ESP-12E
 
+const int sleepTimeS = 10; // Tempo que o ESP-12E vai ficar dormindo (segundos)
+
 DHT dht(DHTPIN, DHTTYPE, 11); // 11 works fine for ESP8266
 float humidity, temp_f;  // Values read from DHT11
 
@@ -56,10 +58,13 @@ const char* apikey = "V290XV7QNBSTL00U";
 int16_t ac1, ac2, ac3, b1, b2, mb, mc, md;
 uint16_t ac4, ac5, ac6;
 uint8_t oss;
-
 int32_t  temp,pres;
 
 //--------------------------------------------------------------------------------
+
+int counter;
+int wlcount;
+
 uint16_t read16(uint8_t reg)
 {
   uint16_t data;
@@ -117,7 +122,7 @@ void  getCalibrationData()
   mb = read16(BMP180_CALIB_PARAM_MB);
   mc = read16(BMP180_CALIB_PARAM_MC);
   md = read16(BMP180_CALIB_PARAM_MD);
-  
+  /*
   Serial.print("ac1 = "); Serial.println(ac1);
   Serial.print("ac2 = "); Serial.println(ac2);
   Serial.print("ac3 = "); Serial.println(ac3);
@@ -129,6 +134,7 @@ void  getCalibrationData()
   Serial.print("mb = "); Serial.println(mb);
   Serial.print("mc = "); Serial.println(mc);
   Serial.print("md = "); Serial.println(md);
+  */
 }
 
 
@@ -194,13 +200,11 @@ void getTempPress()
 }
 //--------------------------------------------------------------------------------
 
-int counter;
-int wlcount;
 
 void setup() {
-  Serial.begin(115200);
-  delay(2000);
-  Serial.println("Starting!");
+  //Serial.begin(115200);
+  //delay(500);
+  //Serial.println("Starting!");
  
   Wire.begin(0, 2); // I2C channel pins (SDA, SCL)
   oss=3;
@@ -208,21 +212,18 @@ void setup() {
   counter=0;
   wlcount=0;
   dht.begin(); // initialize temperature/humidity sensor
-}
 
-
-void loop() {
-
-  counter++;
+  // Código começa aqui:
+   counter++;
   
   String ou;
   String ou2;
   //getCalibrationData();  
   getTempPress();
-  Serial.println(temp);
-  Serial.println(pres);
+  //Serial.println(temp);
+  //Serial.println(pres);
 
-  valorLDR = analogRead(SensorAnalogico)/3.20; //LDR light value, 0-100%
+  valorLDR = analogRead(SensorAnalogico)*0.09765625; //LDR light value, 0-100%
   
   float h = dht.readHumidity();
   // Read temperature as Celsius (the default)
@@ -231,7 +232,7 @@ void loop() {
 
    // Check if any reads failed and exit early (to try again).
   if (isnan(h) || isnan(t)) {
-    Serial.println("Failed to read from DHT sensor!");
+    //Serial.println("Failed to read from DHT sensor!");
     return;
   }
   
@@ -244,20 +245,20 @@ void loop() {
   String pp=String(pres/100)+"."+String(pres%100); // 'pp' is the BMP180 pressure
   
   ou="Temp: "+tt+" Press:" + pp;
-  Serial.println(ou);
+  //Serial.println(ou);
  
  
  
   wlcount=0;
   if(WiFi.status() != WL_CONNECTED) 
   {
-       Serial.print("Connecting to AP: ");
-       Serial.println(ssid);
+       //Serial.print("Connecting to AP: ");
+       //Serial.println(ssid);
        WiFi.begin(ssid, password);
        while (WiFi.status() != WL_CONNECTED) 
        {
         delay(1000);
-        Serial.print(".");
+        //Serial.print(".");
         wlcount++;
         if(wlcount==20) return;
       }
@@ -268,7 +269,7 @@ void loop() {
   const int httpPort = 80;
   if (!client.connect(host, httpPort)) 
   {
-    Serial.println("connection failed");
+    //Serial.println("connection failed");
     return;
   }
   
@@ -281,11 +282,21 @@ void loop() {
   while(client.available())
   {
     String line = client.readStringUntil('\r');
-    Serial.print(line);
+    //Serial.print(line);
   }
   
   
-  delay(30000);  // Delay Time
+  //delay(30000);  // Delay Time
+
+ ESP.deepSleep(30000000); // Função que vai fazer o ESP-12E dormir
+
+  // Código termina AQUI
+}
+
+
+void loop() {
+
+ 
 }
 
 
