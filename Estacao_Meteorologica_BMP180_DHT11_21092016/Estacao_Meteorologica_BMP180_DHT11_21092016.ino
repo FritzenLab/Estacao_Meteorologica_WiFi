@@ -19,11 +19,11 @@ float humidity, temp_f;  // Values read from DHT11
 int SensorAnalogico = A0;    // select the input pin for the potentiometer
 float valorLDR = 0.00;  // variable to store the value coming from the sensor
 
-const char* ssid     = "FRITZEN";
-const char* password = "3649-9334Js";
+const char* ssid     = "NOMEDAREDE";
+const char* password = "SENHADAREDE";
 
 const char* host = "api.thingspeak.com";
-const char* apikey = "V290XV7QNBSTL00U";
+const char* apikey = "APIKEY";
 
 #define BMP180_I2CADDR 0x77
 
